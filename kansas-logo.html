@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Kansas Logo</title>
+  <title>Kansas</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,18 +15,19 @@
       justify-content: center;
       min-height: 100vh;
       overflow: hidden;
-      gap: 10px;
+      gap: 0;
     }
 
     #logo-svg {
       overflow: visible;
-      width: min(88vw, 820px);
+      width: min(90vw, 860px);
       height: auto;
     }
 
+    /* Trazo mientras se dibuja: fino y brillante */
     .lp {
       stroke: white;
-      stroke-width: 1.8;
+      stroke-width: 1.5;
       stroke-linecap: round;
       stroke-linejoin: round;
       fill: transparent;
@@ -35,16 +36,24 @@
     #divider {
       width: 0;
       height: 1px;
-      margin-top: 4px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 70%, transparent);
+      margin-top: 12px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.4) 25%,
+        rgba(255,255,255,0.75) 50%,
+        rgba(255,255,255,0.4) 75%,
+        transparent
+      );
     }
 
     #subtitle {
       font-family: 'Cinzel', serif;
-      font-size: clamp(9px, 1.4vw, 15px);
-      letter-spacing: 0.48em;
-      color: rgba(255, 255, 255, 0.45);
+      font-size: clamp(9px, 1.3vw, 14px);
+      letter-spacing: 0.5em;
+      color: rgba(255, 255, 255, 0.4);
       opacity: 0;
+      margin-top: 10px;
       text-transform: uppercase;
     }
   </style>
@@ -53,131 +62,174 @@
 
 <svg id="logo-svg" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Glow para el trazo mientras se dibuja -->
-    <filter id="pen-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+    <!-- Glow intenso para la punta de la pluma -->
+    <filter id="pen-glow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
-    <!-- Glow suave para el texto completo -->
-    <filter id="text-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+    <!-- Glow suave para el texto ya trazado -->
+    <filter id="trace-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <!-- Glow final del texto completo -->
+    <filter id="fill-glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
 
   <g id="letters"></g>
 
-  <!-- Punta de la pluma: dentro del SVG para usar coordenadas nativas -->
+  <!-- Pluma: punto luminoso que sigue el trazo -->
   <g id="pen" opacity="0">
-    <circle r="14" fill="rgba(255,200,150,0.12)"/>
-    <circle r="7"  fill="rgba(255,220,180,0.25)"/>
-    <circle r="3"  fill="white"/>
-    <circle r="3"  fill="white" filter="url(#pen-glow)"/>
+    <!-- Halo exterior suave -->
+    <circle r="18" fill="rgba(255,200,150,0.08)" filter="url(#pen-glow)"/>
+    <!-- Halo medio -->
+    <circle r="9"  fill="rgba(255,220,180,0.2)"/>
+    <!-- Core brillante -->
+    <circle r="3.5" fill="white"/>
+    <!-- Destello extra -->
+    <circle r="3.5" fill="white" filter="url(#pen-glow)"/>
   </g>
 </svg>
 
 <div id="divider"></div>
 <div id="subtitle">&middot; American Cuisine &middot;</div>
 
-<!-- opentype.js para convertir texto → paths SVG reales -->
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 'use strict';
 
-// Evitar que GSAP frene en tabs background (Playwright, DevTools)
 Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
 gsap.ticker.lagSmoothing(0);
-gsap.set('#subtitle', { y: 12 });
+gsap.set('#subtitle', { y: 14 });
 
-// ── Cargar Great Vibes desde fontsource (WOFF — compatible con opentype.js) ─
-const FONT_URL = 'https://cdn.jsdelivr.net/npm/@fontsource/great-vibes/files/great-vibes-latin-400-normal.woff';
+// Corinthia 700 — swash capitals elegantes, muy cercano al logo Kansas
+// Fallback: Cinzel Decorative (sin swash pero mismo estilo clásico)
+const FONTS = [
+  {
+    url:  'https://cdn.jsdelivr.net/npm/@fontsource/corinthia/files/corinthia-latin-700-normal.woff',
+    text: 'KANSAS',
+  },
+  {
+    url:  'https://cdn.jsdelivr.net/npm/@fontsource/cinzel-decorative/files/cinzel-decorative-latin-700-normal.woff',
+    text: 'KANSAS',
+  },
+  {
+    // último fallback: Great Vibes como ya sabemos que funciona
+    url:  'https://cdn.jsdelivr.net/npm/@fontsource/great-vibes/files/great-vibes-latin-400-normal.woff',
+    text: 'Kansas',
+  },
+];
 
-fetch(FONT_URL)
-  .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
-  .then(buf => opentype.parse(buf))
-  .then(buildLogo)
-  .catch(err => {
-    document.body.innerHTML += `<p style="color:#f88;font-family:monospace;margin-top:20px">Font load error: ${err}</p>`;
-  });
+async function loadFirstAvailable(fonts) {
+  for (const f of fonts) {
+    try {
+      const resp = await fetch(f.url);
+      if (!resp.ok) continue;
+      const buf  = await resp.arrayBuffer();
+      const font = opentype.parse(buf);
+      return { font, text: f.text };
+    } catch (_) { continue; }
+  }
+  throw new Error('No se pudo cargar ningún font');
+}
 
+loadFirstAvailable(FONTS).then(({ font, text }) => buildLogo(font, text));
 
-function buildLogo(font) {
-  const TEXT      = 'Kansas';
-  const FONT_SIZE = 170;
-  const BASELINE  = Math.round(FONT_SIZE * 0.78);
+// ─────────────────────────────────────────────────────────────────────────────
+
+function buildLogo(font, TEXT) {
+  const FONT_SIZE = 180;
+  const BASELINE  = Math.round(FONT_SIZE * 0.80);
 
   const svgEl  = document.getElementById('logo-svg');
   const lGroup = document.getElementById('letters');
   const penG   = document.getElementById('pen');
 
-  // ── 1. Generar paths individuales por letra ──────────────────────────────
+  // ── Generar paths por letra ──────────────────────────────────────────────
   const opPaths = font.getPaths(TEXT, 0, BASELINE, FONT_SIZE);
 
-  // Bounding box global para el viewBox
+  // Bounding box global
   let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
   opPaths.forEach(p => {
     const bb = p.getBoundingBox();
-    x1 = Math.min(x1, bb.x1);
-    y1 = Math.min(y1, bb.y1);
-    x2 = Math.max(x2, bb.x2);
-    y2 = Math.max(y2, bb.y2);
+    if (bb.x1 < bb.x2) { // ignorar glyphs vacíos (espacios)
+      x1 = Math.min(x1, bb.x1);
+      y1 = Math.min(y1, bb.y1);
+      x2 = Math.max(x2, bb.x2);
+      y2 = Math.max(y2, bb.y2);
+    }
   });
 
-  const PAD = 20;
-  svgEl.setAttribute('viewBox', `${x1 - PAD} ${y1 - PAD} ${x2 - x1 + PAD*2} ${y2 - y1 + PAD*2}`);
+  const PAD = 24;
+  svgEl.setAttribute('viewBox',
+    `${x1-PAD} ${y1-PAD} ${x2-x1+PAD*2} ${y2-y1+PAD*2}`
+  );
 
-  // ── 2. Crear elementos <path> para cada letra ────────────────────────────
-  const svgPaths = opPaths.map(op => {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    el.setAttribute('d', op.toPathData(3));
-    el.setAttribute('class', 'lp');
-    lGroup.appendChild(el);
-    return el;
-  });
+  // Crear <path> SVG por cada letra
+  const svgPaths = opPaths
+    .filter(op => {
+      const bb = op.getBoundingBox();
+      return bb.x1 < bb.x2; // filtrar espacios/vacíos
+    })
+    .map(op => {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      el.setAttribute('d', op.toPathData(3));
+      el.setAttribute('class', 'lp');
+      lGroup.appendChild(el);
+      return el;
+    });
 
-  // ── 3. Calcular longitudes (necesita estar en el DOM) ────────────────────
+  // ── Esperar render del DOM para getTotalLength ───────────────────────────
   requestAnimationFrame(() => requestAnimationFrame(() => {
 
     const lengths = svgPaths.map(p => p.getTotalLength());
 
-    // Inicializar dasharray/offset para que todo empiece invisible
+    // Inicializar todo oculto
     svgPaths.forEach((p, i) => {
       p.style.strokeDasharray  = lengths[i];
       p.style.strokeDashoffset = lengths[i];
     });
 
-    // Cursor al inicio
-    (() => {
-      const pt = svgPaths[0].getPointAtLength(0);
-      penG.setAttribute('transform', `translate(${pt.x},${pt.y})`);
-    })();
+    // Posicionar pluma al inicio del primer trazo
+    const pt0 = svgPaths[0].getPointAtLength(0);
+    penG.setAttribute('transform', `translate(${pt0.x},${pt0.y})`);
 
-    // ── 4. Animar letra por letra ────────────────────────────────────────
-    const LETTER_DUR = 0.65;
-    const LETTER_GAP = 0.10;
-    const DELAY_INIT = 0.6;
+    // ── Animar cada letra ────────────────────────────────────────────────
+    // Velocidad proporcional a la complejidad del glyph (más trazos = más tiempo)
+    const BASE_DUR = 0.55;
+    const GAP      = 0.08;
+    const DELAY_0  = 0.7;
 
     // Pluma aparece
-    gsap.to(penG, { opacity: 1, duration: 0.25, delay: DELAY_INIT - 0.1 });
+    gsap.to(penG, { opacity: 1, duration: 0.2, delay: DELAY_0 - 0.15 });
+
+    let cursor = DELAY_0;
 
     svgPaths.forEach((pathEl, i) => {
-      const len   = lengths[i];
-      const delay = DELAY_INIT + i * (LETTER_DUR + LETTER_GAP);
-      const prog  = { v: len };
+      const len = lengths[i];
+      // Normalizar duración según largo del path (más path = más tiempo)
+      const maxLen = Math.max(...lengths);
+      const dur    = BASE_DUR * 0.6 + (len / maxLen) * BASE_DUR * 1.2;
+      const delay  = cursor;
+      cursor += dur + GAP;
+
+      const prog = { v: len };
 
       gsap.to(prog, {
         v: 0,
-        duration: LETTER_DUR,
+        duration: dur,
         delay,
         ease: 'power1.inOut',
 
         onUpdate() {
           pathEl.style.strokeDashoffset = prog.v;
-
-          // Mover la pluma al tip del trazo actual
+          // Mover pluma al tip del trazo
           const drawn = len - prog.v;
-          if (drawn >= 0 && drawn <= len) {
+          if (drawn > 0) {
             try {
               const pt = pathEl.getPointAtLength(Math.min(drawn, len - 0.01));
               penG.setAttribute('transform', `translate(${pt.x},${pt.y})`);
@@ -186,36 +238,38 @@ function buildLogo(font) {
         },
 
         onComplete() {
-          // El trazo termina → relleno blanco aparece
-          gsap.to(pathEl, { fill: 'white', duration: 0.3, ease: 'power1.in' });
+          // Relleno blanco suave al terminar cada letra
+          gsap.to(pathEl, {
+            fill: 'rgba(255,255,255,0.92)',
+            duration: 0.28,
+            ease: 'power1.in',
+          });
 
+          // Última letra
           if (i === svgPaths.length - 1) {
-            // Última letra: ocultar pluma
-            gsap.to(penG, { opacity: 0, duration: 0.4, delay: 0.15 });
+            gsap.to(penG, { opacity: 0, duration: 0.5, delay: 0.1 });
 
-            // Glow suave al texto completo
-            gsap.to(lGroup, {
-              attr: { filter: 'url(#text-glow)' },
-              duration: 0.5,
-              delay: 0.2,
-            });
+            // Glow suave al grupo completo
+            setTimeout(() => {
+              lGroup.setAttribute('filter', 'url(#fill-glow)');
+            }, 400);
 
-            // Divider + subtitle
+            // Divider
             gsap.to('#divider', {
-              width: '55%',
-              duration: 0.65,
-              delay: 0.5,
+              width: '52%',
+              duration: 0.7,
+              delay: 0.55,
               ease: 'power3.out',
             });
+            // Subtitle
             gsap.to('#subtitle', {
               opacity: 1, y: 0,
-              duration: 0.8,
-              delay: 0.7,
+              duration: 0.9,
+              delay: 0.75,
               ease: 'power2.out',
             });
 
-            // Brasas
-            setTimeout(startEmbers, 1300);
+            setTimeout(startEmbers, 1400);
           }
         },
       });
@@ -224,8 +278,7 @@ function buildLogo(font) {
   }));
 }
 
-
-// ── Partículas ember ─────────────────────────────────────────────────────────
+// ── Embers ───────────────────────────────────────────────────────────────────
 function spawnEmber() {
   const el   = document.createElement('div');
   const size = Math.random() * 3.5 + 1;
@@ -235,23 +288,25 @@ function spawnEmber() {
     mix-blend-mode:screen;
     width:${size}px; height:${size}px;
     background:${warm ? '#ffddaa' : '#ffffff'};
-    box-shadow:0 0 ${size * 2}px ${warm ? '#ff8800' : 'rgba(255,255,255,0.6)'};
+    box-shadow:0 0 ${size*2}px ${warm ? '#ff8800' : 'rgba(255,255,255,0.55)'};
   `;
-  el.style.left = (window.innerWidth  * (0.10 + Math.random() * 0.80)) + 'px';
-  el.style.top  = (window.innerHeight * (0.60 + Math.random() * 0.15)) + 'px';
+  el.style.left = (window.innerWidth  * (0.08 + Math.random() * 0.84)) + 'px';
+  el.style.top  = (window.innerHeight * (0.58 + Math.random() * 0.16)) + 'px';
   document.body.appendChild(el);
 
-  const driftX = (Math.random() - 0.5) * 180;
-  const rise   = Math.random() * 280 + 120;
+  const driftX = (Math.random() - 0.5) * 200;
+  const rise   = Math.random() * 300 + 130;
 
   gsap.fromTo(el,
     { opacity: 0, scale: 0.3 },
-    { opacity: 0.9, scale: 1, x: driftX * 0.1, y: -rise * 0.08,
-      duration: 0.2, ease: 'power1.in',
+    {
+      opacity: 0.9, scale: 1,
+      x: driftX * 0.1, y: -rise * 0.08,
+      duration: 0.22, ease: 'power1.in',
       onComplete() {
         gsap.to(el, {
           opacity: 0, x: driftX, y: -rise, scale: 0.1,
-          duration: 1.4 + Math.random() * 0.9,
+          duration: 1.5 + Math.random() * 1.0,
           ease: 'power1.out',
           onComplete: () => el.remove(),
         });
@@ -260,9 +315,7 @@ function spawnEmber() {
   );
 }
 
-function startEmbers() {
-  setInterval(spawnEmber, 105);
-}
+function startEmbers() { setInterval(spawnEmber, 100); }
 </script>
 </body>
 </html>
