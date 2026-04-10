@@ -20,7 +20,7 @@
 
     #logo-svg {
       overflow: visible;
-      width: min(90vw, 860px);
+      width: min(96vw, 1100px);
       height: auto;
     }
 
@@ -110,15 +110,16 @@ gsap.set('#subtitle', { y: 14 });
 // Fallback: Cinzel Decorative (sin swash pero mismo estilo clásico)
 const FONTS = [
   {
-    url:  'https://cdn.jsdelivr.net/npm/@fontsource/corinthia/files/corinthia-latin-700-normal.woff',
-    text: 'KANSAS',
-  },
-  {
+    // Cinzel Decorative: mayúsculas romanas clásicas, muy similar al logo real
     url:  'https://cdn.jsdelivr.net/npm/@fontsource/cinzel-decorative/files/cinzel-decorative-latin-700-normal.woff',
     text: 'KANSAS',
   },
   {
-    // último fallback: Great Vibes como ya sabemos que funciona
+    // Corinthia: swash caps caligráficas
+    url:  'https://cdn.jsdelivr.net/npm/@fontsource/corinthia/files/corinthia-latin-700-normal.woff',
+    text: 'KANSAS',
+  },
+  {
     url:  'https://cdn.jsdelivr.net/npm/@fontsource/great-vibes/files/great-vibes-latin-400-normal.woff',
     text: 'Kansas',
   },
@@ -142,7 +143,7 @@ loadFirstAvailable(FONTS).then(({ font, text }) => buildLogo(font, text));
 // ─────────────────────────────────────────────────────────────────────────────
 
 function buildLogo(font, TEXT) {
-  const FONT_SIZE = 180;
+  const FONT_SIZE = 260;
   const BASELINE  = Math.round(FONT_SIZE * 0.80);
 
   const svgEl  = document.getElementById('logo-svg');
